@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "Review Responder Pro",
+  "version": "3.0.0",
+  "description": "Automatycznie odpowiadaj na recenzje u\u017cywaj\u0105c AI i szablon\u00f3w. Plan Darmowy i Premium.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "clipboardWrite",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://www.google.com/maps/*",
+    "https://maps.google.com/*",
+    "https://www.facebook.com/*",
+    "https://www.allegro.pl/*",
+    "https://www.tripadvisor.com/*",
+    "https://www.yelp.com/*",
+    "https://*.supabase.co/*",
+    "file://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.svg",
+      "48": "icons/icon48.svg",
+      "128": "icons/icon128.svg"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.google.com/maps/*",
+        "https://maps.google.com/*",
+        "https://www.facebook.com/*",
+        "https://www.allegro.pl/*",
+        "https://www.tripadvisor.com/*",
+        "https://www.yelp.com/*",
+        "file://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

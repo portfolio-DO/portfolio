@@ -1,0 +1,51 @@
+# JARVIS - Zaleznosci Python
+# google-generativeai USUNIETA - uzywamy bezposredniego REST API (urllib wbudowany w Python)
+
+# Core async & networking
+websockets==12.0
+aiohttp==3.9.5
+aiofiles==23.2.1
+
+# Wake Word (100% darmowy, open source)
+openwakeword==0.6.0
+
+# Speech-to-Text (lokalny Whisper)
+faster-whisper==1.0.3
+sounddevice==0.4.7
+numpy==1.26.4
+
+# Text-to-Speech
+pyttsx3==2.90
+pygame==2.5.2
+
+# ElevenLabs (opcjonalne - premium TTS)
+# elevenlabs==1.2.2
+
+# Desktop Automation
+pyautogui==0.9.54
+pygetwindow==0.0.9
+pynput==1.7.7
+pillow==10.3.0
+
+# Browser Automation
+playwright==1.44.0
+
+# System control
+psutil==5.9.8
+
+# Windows-specific
+pywin32==306; sys_platform == "win32"
+comtypes==1.4.4; sys_platform == "win32"
+pycaw==20240210; sys_platform == "win32"
+
+# Narzedzia
+pydantic==2.7.3
+python-dotenv==1.0.1
+loguru==0.7.2
+requests==2.32.3
+httpx>=0.27.0
+beautifulsoup4==4.12.3
+lxml==5.2.2
+pyyaml==6.0.1
+
+# Groq oficjalna biblioteka (lepsza obsluga nagłówków niż urllib)

@@ -1,0 +1,317 @@
+================================================================
+  WSZYSTKO CO MOŻE BYĆ TRUDNE — WYJAŚNIENIE PO LUDZKU
+  Review Responder Pro v3
+================================================================
+
+Przeczytaj to zanim zaczniesz konfigurować. Odpowiada na
+pytanie "dlaczego?" przy każdym trudnym kroku.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 1: CZY MUSZĘ MIEĆ DOCKERA WŁĄCZONEGO?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KRÓTKA ODPOWIEDŹ: NIE. Nigdy nie musisz mieć Dockera.
+
+DŁUGA ODPOWIEDŹ:
+  Docker jest potrzebny TYLKO jeśli chcesz uruchamiać
+  Supabase LOKALNIE na swoim komputerze (dla deweloperów).
+
+  W tym rozszerzeniu używamy CHMUROWEJ wersji Supabase
+  (supabase.com) — to jest zwykła strona internetowa,
+  jak Gmail czy Facebook. Tworzysz konto, klikasz w
+  przeglądarce i gotowe. Zero instalacji. Zero Dockera.
+
+  Supabase CLI (komenda "supabase link") potrzebujesz
+  TYLKO do wdrożenia Edge Functions (krok 4 konfiguracji).
+  I to też nie wymaga Dockera — wymaga tylko Node.js.
+
+  PODSUMOWANIE:
+  ✗ Docker        — NIE potrzebujesz nigdy
+  ✗ Serwer VPS    — NIE potrzebujesz
+  ✓ Przeglądarka  — wystarczy do konfiguracji Supabase
+  ✓ Node.js       — potrzebny tylko do Supabase CLI
+  ✓ Terminal       — potrzebny tylko do wdrożenia funkcji
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 2: CO TO JEST SUPABASE I PO CO MI TO?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Supabase to darmowy serwis (jak chmura), który zapewnia:
+
+1. KONTA UŻYTKOWNIKÓW
+   Bez Supabase każdy mógłby kliknąć "zresetuj" w Chrome
+   i stracić historię i ustawienia. Z Supabase:
+   → logujesz się emailem i hasłem
+   → Twoje dane są zapisane na serwerze
+   → działają na każdym komputerze
+
+2. BEZPIECZNE PRZECHOWYWANIE KLUCZA AI
+   Klucz Anthropic (sk-ant-...) to jak hasło do konta —
+   nie można go trzymać w kodzie rozszerzenia bo każdy
+   mógłby go zobaczyć. Supabase Edge Functions trzymają
+   go ukryty na serwerze.
+
+3. LIMITY AI PO STRONIE SERWERA
+   Gdyby limity (5/miesiąc darmowo) były tylko w
+   rozszerzeniu, każdy mógłby je ominąć czyszcząc
+   pamięć Chrome. Na serwerze Supabase tego nie da się obejść.
+
+4. PREMIUM PRZYPISANE DO KONTA
+   Gdy kupujesz Premium ($9/mies.), Stripe mówi Supabase:
+   "ten email zapłacił". Supabase zapisuje to w bazie.
+   Niezależnie na jakim komputerze się zalogujesz,
+   Premium jest aktywne.
+
+CZY SUPABASE JEST BEZPIECZNE?
+  Tak — to jeden z największych i zaufanych serwisów
+  dla deweloperów. Używają go tysiące firm. Twoje dane
+  są szyfrowane. Darmowy plan wystarczy na ~50,000
+  aktywnych użytkowników miesięcznie.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 3: CO TO SĄ "EDGE FUNCTIONS" I PO CO JE WDRAŻAĆ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Edge Functions to małe programy działające NA SERWERACH
+Supabase (nie na Twoim komputerze). Są trzy:
+
+1. claude-proxy
+   Kiedy klikasz "Wygeneruj odpowiedź AI", rozszerzenie
+   NIE wysyła żądania bezpośrednio do Anthropic.
+   Wysyła je do tej funkcji, która:
+   → sprawdza czy masz limity (nie przekroczyłeś 5/mies.)
+   → używa ukrytego klucza Anthropic
+   → zwraca wygenerowaną odpowiedź
+   Dzięki temu klucz Anthropic NIE jest widoczny w rozszerzeniu.
+
+2. stripe-checkout
+   Gdy klikasz "Przejdź na Premium", ta funkcja tworzy
+   stronę płatności Stripe dla Twojego konta.
+
+3. stripe-webhook
+   Gdy Stripe potwierdza płatność, wysyła powiadomienie
+   do tej funkcji. Ona aktualizuje Twoje konto w bazie
+   danych na "premium".
+
+JAK WDROŻYĆ (krok po kroku bez bólu):
+  1. Zainstaluj Node.js z https://nodejs.org (wersja LTS)
+  2. Otwórz Terminal (Windows: wyszukaj "cmd" lub "PowerShell")
+  3. Wpisz: npm install -g supabase
+  4. Wpisz: supabase login
+     (otworzy przeglądarkę — kliknij Authorize)
+  5. Wpisz: supabase link --project-ref TWOJ_REF
+     (Ref znajdziesz w Supabase Dashboard → Project Settings → General)
+  6. Przejdź do folderu z projektem: cd ścieżka/do/rrp-v3
+  7. Wpisz:
+     supabase functions deploy claude-proxy
+     supabase functions deploy stripe-checkout
+     supabase functions deploy stripe-webhook
+  Gotowe! Funkcje działają teraz w chmurze Supabase.
+
+  PO WDROŻENIU: nie musisz robić nic więcej. Działają same.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 4: CO TO JEST HTTP 429 I DLACZEGO SIĘ POJAWIA?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HTTP 429 = "Too Many Requests" = za dużo prób.
+
+Supabase ma limit: max 3 próby rejestracji na minutę
+z jednego adresu IP. Jeśli próbowałeś rejestracji
+kilka razy (np. testując), trafiłeś w ten limit.
+
+CO ROBIĆ:
+  → Odczekaj 1-2 minuty i spróbuj ponownie
+  → Jeśli masz już konto — przejdź na zakładkę Logowanie
+  → Jeśli hasło zostało zapisane — po prostu się zaloguj
+
+W NOWEJ WERSJI: komunikat błędu jest teraz po polsku
+i wyjaśnia dokładnie co się stało.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 5: DLACZEGO ROZSZERZENIE WYLOGOWYWAŁO CO GODZINĘ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Token JWT (dowód tożsamości od Supabase) wygasa po 1 godzinie.
+Stara wersja kodu po prostu "zapominała" sesję gdy token wygasł.
+
+Nowa wersja:
+  → sprawdza kiedy token wygaśnie
+  → 5 minut PRZED wygaśnięciem automatycznie pobiera nowy
+  → używa "refresh_token" (ważny 7 dni) do odświeżania
+  → jesteś zalogowany dopóki nie klikniesz "Wyloguj się"
+     lub nie minęło 7 dni bez otwierania rozszerzenia
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 6: JAK DZIAŁA PREMIUM I DO CZEGO JEST PRZYPISANE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Premium jest PRZYPISANE DO ADRESU E-MAIL (konta Supabase).
+
+Przepływ zakupu:
+  1. Klikasz "Przejdź na Premium" w rozszerzeniu
+  2. Otwiera się strona płatności Stripe (bezpieczna,
+     jak przy zakupach online)
+  3. Wpisujesz dane karty i płacisz $9
+  4. Stripe wysyła automatyczne powiadomienie do Supabase
+  5. Supabase zapisuje w bazie: Twój email = premium
+     (z datą wygaśnięcia za 30 dni)
+  6. Przy kolejnym otwarciu rozszerzenia widgety
+     pokazują 500/500 generacji AI
+
+JEŚLI ZMIENISZ KOMPUTER:
+  Wystarczy zalogować się tym samym emailem i hasłem.
+  Premium działa natychmiast — dane są na serwerze.
+
+JEŚLI SUBSKRYPCJA SIĘ ODNOWI:
+  Stripe automatycznie pobiera płatność co miesiąc
+  i wysyła nowe powiadomienie do Supabase.
+  Nie musisz nic robić.
+
+JAK ANULOWAĆ:
+  Przejdź na Stripe Customer Portal (link w emailu od Stripe)
+  lub napisz bezpośrednio do właściciela rozszerzenia.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 7: CO TO JEST WEBHOOK I DLACZEGO JEST POTRZEBNY?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Webhook to automatyczne powiadomienie wysyłane przez Stripe
+do Twojego serwera (Supabase) gdy coś się dzieje.
+
+Bez webhooka:
+  Użytkownik płaci → Stripe wie → Supabase NIE wie
+  → Premium się nie aktywuje
+
+Z webhookiem:
+  Użytkownik płaci → Stripe wysyła POST do Twojej funkcji
+  → Supabase aktualizuje bazę → Premium aktywne
+
+Ustawienie webhooka (jednorazowe):
+  Stripe Dashboard → Webhooks → Add endpoint
+  URL: https://TWOJ_PROJEKT.supabase.co/functions/v1/stripe-webhook
+  I zaznaczasz 4 zdarzenia (opisane w KONFIGURACJA.txt).
+  Stripe sam wysyła powiadomienia — nic więcej nie musisz robić.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 8: JAK DZIAŁA ROZSZERZENIE NA GOOGLE MAPS?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Rozszerzenie Chrome może "wstrzykiwać" kod JavaScript
+do otwartych stron internetowych — to normalna,
+bezpieczna funkcja przeglądarki.
+
+Gdy otwierasz Google Maps:
+  1. content.js "wchodzi" na stronę i szuka elementów HTML
+     z recenzjami (po unikalnych klasach CSS Google'a)
+  2. Pod każdą wykrytą recenzją dodaje pasek narzędzi
+     z przyciskami "✦ AI" i "Szablon"
+  3. Gdy klikasz przycisk, pyta popup (auth.js) czy masz limity
+  4. Generuje odpowiedź i wstawia ją do pola odpowiedzi Google
+
+DLACZEGO CZASEM NIE WYKRYWA RECENZJI:
+  Google regularnie zmienia kod HTML Maps. Selektory CSS
+  (np. ".MyEned", ".wiI7pd") mogą przestać działać.
+  Rozwiązanie: wklej treść recenzji ręcznie w popup.
+  (Planujemy regularnie aktualizować selektory)
+
+DLACZEGO TRZEBA ODŚWIEŻYĆ STRONĘ PO INSTALACJI:
+  Content scripts nie działają na kartach otwartych
+  PRZED zainstalowaniem rozszerzenia. Wystarczy F5.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 9: CO TO SĄ "SEKRETY" SUPABASE I GDZIE JE WPISAĆ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Sekrety = zmienne środowiskowe = hasła dla Twoich funkcji.
+
+Działają jak menedżer haseł — Edge Functions mają do nich
+dostęp, ale nikt inny nie może ich zobaczyć (nawet Ty
+po wpisaniu).
+
+GDZIE WPISAĆ:
+  Supabase Dashboard → Edge Functions → Manage secrets
+  (ikona zamka w lewym menu) → kliknij "Add new secret"
+
+CO WPISAĆ:
+  Nazwa (lewa kolumna) = dokładnie jak niżej (wielkimi literami)
+  Wartość (prawa kolumna) = Twój klucz
+
+  CLAUDE_API_KEY         → sk-ant-api03-TwójKluczAnthropic
+  STRIPE_SECRET_KEY      → sk_test_51TwójKluczStripe
+  STRIPE_PRICE_ID        → price_TwójIdCeny
+  STRIPE_WEBHOOK_SECRET  → whsec_TwójSekretWebhooka
+
+  SUPABASE_URL i SUPABASE_SERVICE_ROLE_KEY są dodawane
+  AUTOMATYCZNIE — nie musisz ich wpisywać.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 10: KTÓRE KLUCZE MOGĘ POKAZAĆ, A KTÓRYCH NIE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BEZPIECZNE (można wpisać do config.js / pokazać publicznie):
+  ✓ SUPABASE_URL           https://xxx.supabase.co
+  ✓ SUPABASE_ANON_KEY      eyJhbGci... (klucz "anon/public")
+  ✓ STRIPE_PUBLISHABLE_KEY pk_test_... lub pk_live_...
+
+TAJNE (tylko w Supabase Secrets, NIGDY w config.js!):
+  ✗ CLAUDE_API_KEY (Anthropic)  sk-ant-api03-...
+  ✗ STRIPE_SECRET_KEY           sk_test_... lub sk_live_...
+  ✗ STRIPE_WEBHOOK_SECRET       whsec_...
+  ✗ SUPABASE_SERVICE_ROLE_KEY   eyJhbGci... (klucz "service_role")
+
+JAK ZAPAMIĘTAĆ:
+  "pub" / "anon" / "publishable" = bezpieczne
+  "secret" / "service" / "api key" = tajne
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 11: STRIPE TRYB TESTOWY VS LIVE — RÓŻNICA?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TRYB TESTOWY (pk_test_ / sk_test_):
+  → Możesz płacić kartą 4242 4242 4242 4242 (testowa)
+  → Żadne prawdziwe pieniądze nie są pobierane
+  → Idealne do testowania czy wszystko działa
+  → Użyj tego na początku!
+
+TRYB LIVE (pk_live_ / sk_live_):
+  → Prawdziwe płatności
+  → Pamiętaj: musisz zaktualizować WSZYSTKIE klucze
+    (zarówno w config.js jak i w Supabase Secrets)
+  → Musisz też stworzyć nowy webhook dla trybu Live
+    (w Stripe Dashboard jest osobna sekcja dla Live)
+
+ZALECENIE: Najpierw przetestuj wszystko w trybie testowym.
+Dopiero gdy wszystko działa poprawnie, przełącz na Live.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTANIE 12: NAJPROŚCIEJ JAK SIĘ DA — MINIMALNA KONFIGURACJA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Jeśli chcesz po prostu UŻYWAĆ rozszerzenia bez całej
+infrastruktury, oto minimum:
+
+OPCJA A — Tylko szablony (bez AI):
+  1. Załaduj extension/ w Chrome
+  2. Zaloguj się (po konfiguracji Supabase)
+  3. Używaj szablonów — działają bez żadnego API
+
+OPCJA B — Szablony + AI z własnym kluczem:
+  1. Kup klucz Anthropic na console.anthropic.com (~$5)
+  2. Wpisz go w Ustawieniach rozszerzenia → "Własny klucz"
+  3. Limity są śledzone lokalnie w Chrome
+  → Nie potrzebujesz Supabase ani Stripe!
+
+OPCJA C — Pełna wersja (konto + Premium):
+  1. Skonfiguruj Supabase (30 min, tylko przeglądarka)
+  2. Dodaj klucz Anthropic jako sekret Supabase
+  3. Wdróż Edge Functions (10 min, terminal)
+  4. Opcjonalnie: skonfiguruj Stripe dla Premium
+  → Pełne możliwości: konta, limity serwerowe, Premium
+
+================================================================
+  Masz pytanie którego tu nie ma? Sprawdź też:
+  KONFIGURACJA.txt — jak wypełnić config.js krok po kroku
+  stripe_setup.txt — konfiguracja Stripe szczegółowo
+  deployment.txt   — jak załadować i opublikować rozszerzenie
+================================================================

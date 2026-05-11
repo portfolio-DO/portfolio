@@ -1,0 +1,298 @@
+================================================================
+  KONFIGURACJA — Review Responder Pro v3
+  Przewodnik krok po kroku (po polsku)
+================================================================
+
+Ten plik wyjaśnia jak skonfigurować rozszerzenie od zera.
+Możesz zacząć od KROKU 1 (podstawowe działanie bez serwera)
+lub od razu przejść do pełnej konfiguracji.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SZYBKI START — BEZ SUPABASE (tryb offline)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Jeśli chcesz tylko przetestować rozszerzenie bez konfiguracji:
+
+1. Załaduj folder extension/ w Chrome (chrome://extensions → Load unpacked)
+2. Kliknij "Tryb gości" — nie wymaga żadnych kluczy
+3. Wejdź w Ustawienia → wpisz swój klucz Anthropic API
+   (zaczyna się od: sk-ant-api03-)
+4. Możesz używać szablonów i AI — limity są śledzone lokalnie
+
+OGRANICZENIA TRYBU OFFLINE:
+  ✗ Konto użytkownika nie jest trwałe (brak logowania)
+  ✗ Premium nie jest dostępne
+  ✗ Klucz API jest widoczny w ustawieniach (mniej bezpieczne)
+  ✓ Szablony działają w pełni
+  ✓ AI działa z własnym kluczem
+  ✓ Historia lokalna działa
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KROK 1 — PLIK config.js (JEDYNE MIEJSCE GDZIE COKOLWIEK WPISUJESZ)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Otwórz plik: extension/config.js
+
+To jest JEDYNY plik, który musisz edytować.
+Poniżej wyjaśniam każde pole i jak wygląda poprawna wartość.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KROK 2 — SUPABASE (konto użytkownika + baza danych)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DLACZEGO: Supabase przechowuje konta użytkowników i śledzi
+limity AI po stronie serwera. Bez niego nie ma logowania.
+
+A) UTWÓRZ DARMOWE KONTO:
+   1. Wejdź na: https://supabase.com
+   2. Kliknij "Start your project" → zaloguj przez GitHub lub email
+   3. Kliknij "New project"
+   4. Wybierz organizację, nazwij projekt (np. "review-responder")
+   5. Wybierz region: Frankfurt (eu-central-1) — najbliższy Polsce
+   6. Ustaw hasło do bazy (zapisz je gdzieś!)
+   7. Kliknij "Create new project"
+   8. Poczekaj ~2 minuty na inicjalizację
+
+B) POBIERZ KLUCZE:
+   Przejdź do: Project Settings (ikona zębatki) → API
+
+   SUPABASE_URL:
+   ┌─────────────────────────────────────────────────────────┐
+   │ Sekcja: "Project URL"                                   │
+   │ Przykład: https://abcdefghijklmnop.supabase.co          │
+   │ Format: zawsze https://, 16 małych liter, .supabase.co  │
+   └─────────────────────────────────────────────────────────┘
+
+   SUPABASE_ANON_KEY:
+   ┌─────────────────────────────────────────────────────────┐
+   │ Sekcja: "Project API keys" → "anon public"              │
+   │ Przykład: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc  │
+   │ Format: zaczyna się od eyJ, bardzo długi (~200 znaków)  │
+   │ UWAGA: to jest bezpieczny klucz (anon/public)           │
+   │        NIE mylić z "service_role" (secret)!             │
+   └─────────────────────────────────────────────────────────┘
+
+   Wklej oba do config.js:
+   SUPABASE_URL: 'https://twojprojekt.supabase.co',
+   SUPABASE_ANON_KEY: 'eyJhbGci...',
+
+C) WYŁĄCZ POTWIERDZENIE EMAILA (żeby logowanie działało od razu):
+   Przejdź do: Authentication → Providers → Email
+   Wyłącz: "Confirm email" (przełącznik na OFF)
+   Kliknij Save
+
+   BEZ TEGO: po rejestracji przyjdzie email z linkiem do potwierdzenia.
+   Dopóki go nie klikniesz, logowanie nie zadziała.
+
+D) URUCHOM SCHEMAT BAZY DANYCH:
+   Przejdź do: SQL Editor → New Query
+   Skopiuj CAŁĄ zawartość pliku:
+   supabase/migrations/001_schema.sql
+   Wklej do edytora i kliknij "Run"
+   Zobaczysz: "Success. No rows returned."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KROK 3 — ANTHROPIC API KEY (do generowania odpowiedzi AI)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DLACZEGO: Bez klucza AI nie będzie generować odpowiedzi.
+
+A) UTWÓRZ KONTO:
+   1. Wejdź na: https://console.anthropic.com
+   2. Zarejestruj się (wymagana karta kredytowa do API)
+   3. Przejdź do: API Keys → Create Key
+
+   KLUCZ ANTHROPIC API:
+   ┌─────────────────────────────────────────────────────────┐
+   │ Zawsze zaczyna się od: sk-ant-api03-                    │
+   │ Przykład: sk-ant-api03-XXXXXXXXXXXXXXXXXXXXXXXXXXXX     │
+   │ Format: sk-ant-api03- + długi ciąg liter i cyfr        │
+   │                                                         │
+   │ GDZIE WPISAĆ:                                           │
+   │ OPCJA A (zalecana): Wdróż go jako sekret Supabase       │
+   │   → supabase/edge functions → Secrets → CLAUDE_API_KEY │
+   │   Klucz nigdy nie jest widoczny w rozszerzeniu!         │
+   │                                                         │
+   │ OPCJA B (offline): Wpisz w Ustawieniach rozszerzenia    │
+   │   → pole "Klucz Anthropic API"                          │
+   │   Lub w config.js → ANTHROPIC_API_KEY_FALLBACK          │
+   └─────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KROK 4 — EDGE FUNCTIONS SUPABASE (serwer proxy dla AI)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DLACZEGO: Edge Functions ukrywają klucz Anthropic przed
+użytkownikami i egzekwują limity na serwerze.
+
+A) ZAINSTALUJ SUPABASE CLI:
+   Otwórz terminal/wiersz poleceń i wpisz:
+   npm install -g supabase
+
+B) ZALOGUJ SIĘ:
+   supabase login
+   (otworzy się przeglądarka — kliknij Authorize)
+
+C) POŁĄCZ Z PROJEKTEM:
+   supabase link --project-ref TWOJ_PROJECT_REF
+   (Project Ref znajdziesz w: Project Settings → General → Reference ID)
+   Przykład: supabase link --project-ref abcdefghijklmnop
+
+D) DODAJ SEKRETY (klucze, których nie chcesz w kodzie):
+   Supabase Dashboard → Edge Functions → Manage secrets
+
+   Dodaj te sekrety (Supabase Dashboard → Edge Functions → Secrets):
+
+   ┌─────────────────────────────────────────────────────────┐
+   │ CLAUDE_API_KEY                                          │
+   │ Wartość: sk-ant-api03-TWOJ_KLUCZ                        │
+   │ (Twój klucz Anthropic z kroku 3)                        │
+   └─────────────────────────────────────────────────────────┘
+
+   Pozostałe sekrety (potrzebne dopiero do Stripe w kroku 5):
+   STRIPE_SECRET_KEY       → sk_test_... lub sk_live_...
+   STRIPE_PRICE_ID         → price_...
+   STRIPE_WEBHOOK_SECRET   → whsec_...
+
+E) WDRÓŻ FUNKCJE:
+   supabase functions deploy claude-proxy
+   supabase functions deploy stripe-checkout
+   supabase functions deploy stripe-webhook
+
+   Sprawdź czy działają:
+   supabase functions logs claude-proxy
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KROK 5 — STRIPE (płatności Premium) — OPCJONALNE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Szczegółowa instrukcja: patrz plik stripe_setup.txt
+
+KRÓTKO:
+1. Utwórz konto na stripe.com
+2. Utwórz produkt: $9/miesiąc (subskrypcja)
+3. Pobierz klucze:
+
+   STRIPE_PUBLISHABLE_KEY (do config.js):
+   ┌─────────────────────────────────────────────────────────┐
+   │ Stripe Dashboard → Developers → API Keys                │
+   │ Tryb testowy: pk_test_51...  (zaczyna się od pk_test_)  │
+   │ Tryb live:    pk_live_51...  (zaczyna się od pk_live_)  │
+   │ To jest BEZPIECZNY klucz — można go wpisać w config.js  │
+   └─────────────────────────────────────────────────────────┘
+
+   STRIPE_SECRET_KEY (TYLKO do Supabase Secrets, NIGDY do kodu!):
+   ┌─────────────────────────────────────────────────────────┐
+   │ Tryb testowy: sk_test_51...  (zaczyna się od sk_test_)  │
+   │ Tryb live:    sk_live_51...  (zaczyna się od sk_live_)  │
+   │ Ten klucz idzie TYLKO do Supabase Edge Functions Secrets │
+   └─────────────────────────────────────────────────────────┘
+
+   STRIPE_PRICE_ID (do Supabase Secrets):
+   ┌─────────────────────────────────────────────────────────┐
+   │ Stripe Dashboard → Products → Twój produkt → Price ID   │
+   │ Zaczyna się od: price_                                  │
+   │ Przykład: price_1ABC123DEF456GHI                        │
+   └─────────────────────────────────────────────────────────┘
+
+4. Ustaw Webhook (żeby Stripe informował serwer o płatnościach):
+   Stripe → Webhooks → Add endpoint
+   URL: https://TWOJ_PROJEKT.supabase.co/functions/v1/stripe-webhook
+   Zdarzenia: checkout.session.completed, invoice.payment_succeeded,
+              invoice.payment_failed, customer.subscription.deleted
+
+   STRIPE_WEBHOOK_SECRET (do Supabase Secrets):
+   ┌─────────────────────────────────────────────────────────┐
+   │ Po stworzeniu webhooka → kliknij nań → "Signing secret" │
+   │ Zaczyna się od: whsec_                                  │
+   │ Przykład: whsec_ABCDEF123456...                         │
+   └─────────────────────────────────────────────────────────┘
+
+5. Opcjonalnie: utwórz Stripe Payment Link i wklej do config.js:
+   STRIPE_DIRECT_LINK: 'https://buy.stripe.com/...'
+   (działa nawet bez Supabase — kliknięcie otwiera stronę płatności)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KOMPLETNY PRZYKŁAD config.js (z wypełnionymi wartościami)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const CONFIG = {
+  SUPABASE_URL:     'https://abcdefghijklmnop.supabase.co',
+  SUPABASE_ANON_KEY:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc...',
+  STRIPE_PUBLISHABLE_KEY: 'pk_test_51ABC123...',
+  STRIPE_DIRECT_LINK: 'https://buy.stripe.com/test_abc123',
+  ANTHROPIC_API_KEY_FALLBACK: '',  // tylko jeśli nie używasz Supabase
+  FREE_BONUS_GENERATIONS: 15,
+  FREE_MONTHLY_GENERATIONS: 5,
+  PREMIUM_MONTHLY_GENERATIONS: 500,
+  AI_MODEL: 'claude-sonnet-4-20250514',
+  AI_MAX_TOKENS: 300,
+  APP_VERSION: '3.0.0',
+};
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NAJCZĘSTSZE PROBLEMY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEM: "Rozszerzenie wylogowuje mnie po każdym zamknięciu"
+ROZWIĄZANIE: Token JWT wygasa po 1 godzinie. Nowa wersja auth.js
+  automatycznie odświeża token. Upewnij się że masz aktualny kod.
+  Jeśli problem nadal występuje: zaloguj się ponownie — nowy token
+  jest ważny przez 1 godzinę i automatycznie się odnawia.
+
+PROBLEM: "Mogę rejestrować się wielokrotnie na ten sam email"
+ROZWIĄZANIE: Supabase z włączonym "Confirm email" pozwala na
+  wielokrotne wywołanie rejestracji na ten sam email (każde wysyła
+  nowy link). Wyłącz "Confirm email" w:
+  Authentication → Providers → Email → Confirm email: OFF
+
+PROBLEM: "Przejdź na Premium — pokazuje błąd"
+ROZWIĄZANIE: Opcja 1 — wpisz STRIPE_DIRECT_LINK w config.js
+  (Payment Link z Stripe Dashboard → Payment Links → Create)
+  Opcja 2 — skonfiguruj pełne Supabase + Stripe wg kroków 4-5.
+
+PROBLEM: "Wygeneruj odpowiedź AI — błąd 'brak klucza API'"
+ROZWIĄZANIE: Albo wpisz klucz w Ustawieniach rozszerzenia,
+  albo wdróż claude-proxy na Supabase z kluczem jako sekret.
+
+PROBLEM: "Nie widzę recenzji na Google Maps"
+ROZWIĄZANIE: Odśwież kartę Google Maps PO załadowaniu rozszerzenia.
+  Content scripts działają tylko na kartach otwartych po instalacji.
+  Upewnij się że jesteś na stronie konkretnej firmy z widocznymi
+  recenzjami (nie na wynikach wyszukiwania).
+
+PROBLEM: "Supabase link: command not found"
+ROZWIĄZANIE: Najpierw zainstaluj Node.js (nodejs.org), potem:
+  npm install -g supabase
+
+================================================================
+  KONTAKT I WSPARCIE
+  Wszystkie pytania: sprawdź deployment.txt i stripe_setup.txt
+================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WAŻNE: EMAIL Z REJESTRACJĄ KIERUJE NA LOCALHOST:3000
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Domyślnie Supabase wysyła emaile z linkiem aktywacyjnym do:
+  http://localhost:3000
+
+To trzeba zmienić NA POCZĄTKU konfiguracji:
+
+1. Przejdź do: Supabase Dashboard → Authentication → URL Configuration
+2. Zmień "Site URL" na cokolwiek sensownego, np.:
+   https://twoja-strona.pl
+   LUB jeśli nie masz strony, wpisz po prostu:
+   https://google.com
+   (i tak link nie będzie potrzebny jeśli wyłączysz "Confirm email")
+
+3. Kliknij Save
+
+LUB (prostsze rozwiązanie):
+   Wyłącz potwierdzenie emaila całkowicie:
+   Authentication → Providers → Email → "Confirm email" → OFF
+
+   Wtedy email aktywacyjny w ogóle nie jest wysyłany
+   i problem znika. Zalecane na czas testów.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

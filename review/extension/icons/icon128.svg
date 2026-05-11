@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="24" fill="#2563eb"/>
+  <path d="M100 74a13 13 0 0 1-13 13H34L20 100V40a13 13 0 0 1 13-13H87a13 13 0 0 1 13 13Z" fill="white"/>
+  <path d="M42 52h44M42 66h28" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+  <!-- Star badge -->
+  <circle cx="94" cy="34" r="16" fill="#fbbf24"/>
+  <path d="M94 24l2.4 7.4h7.8l-6.3 4.6 2.4 7.4L94 39l-6.3 4.4 2.4-7.4-6.3-4.6h7.8Z" fill="white"/>
+</svg>

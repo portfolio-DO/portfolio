@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RRP Sandbox — Google Maps (testowy)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #1a73e8; --blue-dim: #e8f0fe; --border: #dadce0;
+      --text: #202124; --text2: #5f6368; --star: #fbbc04;
+      --green: #188038; --red: #d93025; --bg: #f1f3f4;
+      --card: #ffffff; --font: Roboto, -apple-system, sans-serif;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; }
+
+    /* ── TOP BAR ──────────────────────────────────── */
+    .topbar {
+      background: #fff; border-bottom: 1px solid var(--border);
+      padding: 0 16px; height: 56px;
+      display: flex; align-items: center; gap: 14px;
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    }
+    .gmaps-logo { font-size: 22px; font-weight: 500; color: #5f6368; }
+    .gmaps-logo b { color: #4285f4; }
+    .sandbox-chip {
+      background: #fce8e6; color: #c5221f; font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px; border: 1px solid #f5c6c2;
+    }
+    .topbar-tip {
+      margin-left: auto; font-size: 12px; color: var(--text2);
+      background: #e6f4ea; border: 1px solid #ceead6;
+      padding: 5px 12px; border-radius: 20px;
+    }
+
+    /* ── LAYOUT ───────────────────────────────────── */
+    .layout { display: flex; min-height: calc(100vh - 56px); }
+
+    /* ── PANEL ────────────────────────────────────── */
+    .panel {
+      width: 440px; flex-shrink: 0;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+      position: sticky; top: 56px;
+    }
+
+    /* Business tabs */
+    .biz-tabs {
+      display: flex; overflow-x: auto; border-bottom: 1px solid var(--border);
+      background: #fff;
+    }
+    .biz-tab {
+      flex-shrink: 0; padding: 12px 16px;
+      border: none; background: none; cursor: pointer;
+      font-family: var(--font); font-size: 13px; color: var(--text2);
+      border-bottom: 3px solid transparent; transition: all .15s;
+      white-space: nowrap;
+    }
+    .biz-tab:hover { color: var(--blue); background: var(--blue-dim); }
+    .biz-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 500; }
+
+    /* Business info */
+    .biz-info { padding: 18px 16px 12px; border-bottom: 1px solid var(--border); }
+    .biz-name { font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+    .biz-rating-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .biz-rating-num { font-size: 18px; font-weight: 500; }
+    .biz-stars { color: var(--star); font-size: 15px; letter-spacing: -1px; }
+    .biz-count { font-size: 13px; color: var(--blue); cursor: pointer; }
+    .biz-meta { font-size: 13px; color: var(--text2); }
+    .open { color: var(--green); font-weight: 500; }
+
+    /* How-to instructions */
+    .howto {
+      margin: 12px 16px;
+      background: #e6f4ea; border: 1px solid #ceead6;
+      border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.7;
+    }
+    .howto strong { color: #137333; }
+    .howto ol { margin-left: 18px; }
+
+    /* Reviews */
+    .reviews-header {
+      padding: 12px 16px 8px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .reviews-title { font-size: 15px; font-weight: 500; }
+
+    /*
+     * CRITICAL: These class names MUST match content.js CONTAINER_SELECTORS
+     * Container:  [data-review-id]  ✓
+     * Text:       .wiI7pd           ✓
+     * Name:       .d4r55            ✓
+     * Rating:     .kvMYJc           ✓ (aria-label with stars)
+     */
+    .review-card {
+      border-top: 1px solid var(--border);
+      padding: 14px 16px;
+      background: var(--card);
+    }
+
+    .reviewer-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px; color: #fff; flex-shrink: 0;
+    }
+
+    /* Google Maps actual class name for reviewer name */
+    .d4r55 { font-weight: 500; font-size: 14px; }
+    .reviewer-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+
+    .rating-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+
+    /* Google Maps actual class name for star container */
+    .kvMYJc { color: var(--star); font-size: 14px; letter-spacing: -1px; }
+
+    .review-date { font-size: 12px; color: var(--text2); }
+
+    /* Google Maps actual class name for review text */
+    .wiI7pd { font-size: 14px; line-height: 1.6; color: var(--text); margin-bottom: 10px; }
+
+    /* Owner reply section — matches content.js OWNER_REPLY_TEXT_SIGNALS */
+    .owner-reply {
+      background: #f8f9fa; border-left: 3px solid var(--blue);
+      border-radius: 0 8px 8px 0; padding: 10px 12px; margin-top: 8px;
+    }
+    .owner-reply-label {
+      font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 4px;
+    }
+    /* "Odpowiedź od właściciela" — exact phrase content.js looks for */
+    .owner-reply-text { font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
+
+    /* Reply form */
+    .reply-area { margin-top: 10px; }
+    /* .reply-trigger matches content.js REPLY_BUTTON_SELECTORS aria-label pattern */
+    .reply-trigger {
+      background: none; border: none; color: var(--blue); font-size: 13px;
+      font-weight: 500; cursor: pointer; padding: 4px 0; font-family: var(--font);
+    }
+    .reply-trigger:hover { text-decoration: underline; }
+
+    .reply-form { display: none; margin-top: 8px; flex-direction: column; gap: 8px; }
+    .reply-form.open { display: flex; }
+    /* For extension auto-detection: textarea is always in DOM even when hidden */
+
+    /* aria-label="Odpowiedz na recenzję" — matches content.js REPLY_BOX_SELECTORS */
+    .reply-textarea {
+      width: 100%; min-height: 90px;
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; font-size: 13px; font-family: var(--font);
+      resize: vertical; outline: none; color: var(--text);
+      transition: border-color .15s;
+    }
+    .reply-textarea:focus { border-color: var(--blue); }
+
+    .reply-btns { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-cancel {
+      padding: 7px 16px; border: none; border-radius: 4px;
+      background: none; color: var(--blue); font-size: 14px;
+      font-weight: 500; cursor: pointer; font-family: var(--font);
+    }
+    .btn-cancel:hover { background: var(--blue-dim); }
+    .btn-post {
+      padding: 7px 16px; border: none; border-radius: 4px;
+      background: var(--blue); color: #fff; font-size: 14px;
+      font-weight: 500; cursor: pointer; font-family: var(--font);
+    }
+    .btn-post:hover { background: #1557b0; }
+
+    /* ── MAP ──────────────────────────────────────── */
+    .map-area {
+      flex: 1; background: #e0e0e0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px; color: #9e9e9e;
+      font-size: 15px;
+    }
+    .map-icon { font-size: 48px; }
+
+    /* ── TOAST ────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #323232; color: #fff; padding: 10px 20px;
+      border-radius: 6px; font-size: 13px; z-index: 9999;
+      animation: toastIn .2s ease; white-space: nowrap;
+    }
+    @keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(6px); } }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="gmaps-logo"><b>G</b>oogle Maps</div>
+  <div class="sandbox-chip">🧪 SANDBOX</div>
+  <div class="topbar-tip">
+    💡 Kliknij ikonę RRP w Chrome → "Wykryj ze strony"
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- PANEL: Reviews -->
+  <div class="panel" id="panel">
+
+    <!-- Business tabs -->
+    <div class="biz-tabs" id="biz-tabs">
+      <button class="biz-tab active" data-biz="0">🍕 Pizzeria Roma</button>
+      <button class="biz-btn active" data-biz="1" style="display:none"></button>
+      <button class="biz-tab" data-biz="1">💈 Fryzjer u Jana</button>
+      <button class="biz-tab" data-biz="2">🏥 Dentysta Kowalski</button>
+      <button class="biz-tab" data-biz="3">🛒 Sklep meblowy</button>
+    </div>
+
+    <!-- Business info (rendered by JS) -->
+    <div class="biz-info" id="biz-info"></div>
+
+    <!-- How-to -->
+    <div class="howto">
+      <strong>Jak testować rozszerzenie:</strong>
+      <ol>
+        <li>Załaduj rozszerzenie w Chrome (chrome://extensions → Load unpacked)</li>
+        <li>Kliknij ikonę RRP w pasku narzędzi Chrome</li>
+        <li>Kliknij <strong>"↻ Wykryj ze strony"</strong> — rozszerzenie znajdzie recenzje poniżej</li>
+        <li>Wybierz recenzję z listy po lewej w popupie</li>
+        <li>Kliknij <strong>"Znajdź pasujące szablony"</strong> lub <strong>"Wygeneruj AI"</strong></li>
+        <li>Kliknij <strong>"Wstaw na stronie"</strong> — tekst pojawi się w polu poniżej recenzji</li>
+        <li>Kliknij <strong>"Opublikuj"</strong> żeby zobaczyć efekt</li>
+      </ol>
+    </div>
+
+    <!-- Reviews (rendered by JS) -->
+    <div class="reviews-header">
+      <div class="reviews-title" id="reviews-title">Opinie</div>
+    </div>
+    <div id="reviews-container"></div>
+
+  </div>
+
+  <!-- MAP placeholder -->
+  <div class="map-area">
+    <div class="map-icon">🗺️</div>
+    <div>Wirtualna mapa — środowisko testowe</div>
+    <div style="font-size:13px">Recenzje są po lewej stronie</div>
+  </div>
+
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────
+// IMPORTANT: class names match content.js selectors EXACTLY:
+//   data-review-id  → CONTAINER_SELECTORS
+//   .wiI7pd         → TEXT_SELECTORS
+//   .d4r55          → NAME_SELECTORS
+//   .kvMYJc         → RATING_SELECTORS (with aria-label)
+//   aria-label="Odpowiedz na recenzję" → REPLY_BOX_SELECTORS
+//   "Odpowiedź od właściciela" in text → OWNER_REPLY_TEXT_SIGNALS
+
+const BUSINESSES = [
+  {
+    name: 'Pizzeria Roma',
+    cat: 'Restauracja włoska · $$ · ul. Szewska 12, Kraków',
+    rating: 4.1, total: 247, open: true,
+    reviews: [
+      {
+        id: 'rrp_r001',
+        reviewer: 'Marek Kowalski', initials: 'MK', color: '#1a73e8',
+        contribs: '12 opinii', ago: '3 tygodnie temu', rating: 1,
+        text: 'Absolutnie fatalna obsługa. Czekałem 45 minut na pizzę, która przyszła zimna i z zupełnie innym sosem niż zamawiałem. Kelner był arogancki gdy zwróciłem uwagę. Nie polecam nikomu, zdecydowanie omijać z daleka!',
+        replied: false,
+      },
+      {
+        id: 'rrp_r002',
+        reviewer: 'Anna Wiśniewska', initials: 'AW', color: '#e91e63',
+        contribs: '34 opinie', ago: '1 tydzień temu', rating: 5,
+        text: 'Rewelacyjna pizza! Ciasto idealne, składniki świeże, obsługa miła i szybka. Byliśmy z całą rodziną i wszyscy zachwyceni. Na pewno wrócimy, gorąco polecam!',
+        replied: true,
+        replyText: 'Dziękujemy serdecznie za tę piękną opinię, Anno! Cieszymy się, że cała rodzina była zadowolona — to dla nas największa nagroda. Czekamy na kolejną wizytę!\n\nZespół Pizzeria Roma',
+      },
+      {
+        id: 'rrp_r003',
+        reviewer: 'Tomasz Nowak', initials: 'TN', color: '#4caf50',
+        contribs: '5 opinii', ago: '2 tygodnie temu', rating: 2,
+        text: 'Bardzo rozczarowany. Jedzenie było zimne, składniki nieświeże, a do tego za drogo jak na taką jakość. Obsługa poprawna, ale jedzenie zdecydowanie nie to co dawniej. Nie wrócimy.',
+        replied: false,
+      },
+      {
+        id: 'rrp_r004',
+        reviewer: 'Katarzyna Zielińska', initials: 'KZ', color: '#ff9800',
+        contribs: '89 opinii', ago: '5 dni temu', rating: 4,
+        text: 'Dobra pizza, szczególnie ta z wędzonym łososiem. Czas oczekiwania ok, lokal czysty i przyjemny. Lekki minus za głośną muzykę. Ogólnie polecam!',
+        replied: false,
+      },
+      {
+        id: 'rrp_r005',
+        reviewer: 'Piotr Jabłoński', initials: 'PJ', color: '#9c27b0',
+        contribs: '3 opinie', ago: '4 dni temu', rating: 1,
+        text: 'Skandal! Znalazłem włos w pizzy. Kelner przeprosił ale nic nie zaproponował w zamian. Nieakceptowalne. Nigdy więcej!',
+        replied: false,
+      },
+      {
+        id: 'rrp_r006',
+        reviewer: 'Beata Malinowska', initials: 'BM', color: '#009688',
+        contribs: '21 opinii', ago: '2 dni temu', rating: 3,
+        text: 'Przeciętnie. Pizza w porządku, ale czekałam dłużej niż oczekiwałam jak na prawie puste miejsce. Cena adekwatna do jakości. Mogło być lepiej.',
+        replied: false,
+      },
+    ],
+  },
+  {
+    name: 'Fryzjer u Jana',
+    cat: 'Salon fryzjerski · $ · ul. Długa 5, Warszawa',
+    rating: 3.8, total: 89, open: true,
+    reviews: [
+      {
+        id: 'rrp_r101',
+        reviewer: 'Beata Kowalczyk', initials: 'BK', color: '#f44336',
+        contribs: '17 opinii', ago: '2 dni temu', rating: 5,
+        text: 'Jan to prawdziwy artysta! Przyszłam z kiepskim fryzem i wyszłam z piękną fryzurą. Dokładnie taki efekt jak chciałam. Obsługa miła, cena uczciwa. Zdecydowanie polecam!',
+        replied: false,
+      },
+      {
+        id: 'rrp_r102',
+        reviewer: 'Michał Dąbrowski', initials: 'MD', color: '#3f51b5',
+        contribs: '8 opinii', ago: '1 tydzień temu', rating: 2,
+        text: 'Niezadowolony. Czekałem 30 minut mimo rezerwacji, a strzyżenie było niedbałe — z jednej strony krótsze niż z drugiej. Na reklamację fryzjer powiedział że "tak miało być". Nie wracam.',
+        replied: false,
+      },
+      {
+        id: 'rrp_r103',
+        reviewer: 'Zofia Michalak', initials: 'ZM', color: '#795548',
+        contribs: '22 opinie', ago: '3 tygodnie temu', rating: 3,
+        text: 'Przeciętnie. Strzyżenie w porządku, ale salon trochę zagracony i muzyka zbyt głośna. Cena ok. Mogło być lepiej.',
+        replied: false,
+      },
+    ],
+  },
+  {
+    name: 'Dentysta dr Kowalski',
+    cat: 'Gabinet stomatologiczny · $$$ · ul. Piękna 22, Poznań',
+    rating: 4.7, total: 156, open: false,
+    reviews: [
+      {
+        id: 'rrp_r201',
+        reviewer: 'Grażyna Wiśniewska', initials: 'GW', color: '#607d8b',
+        contribs: '45 opinii', ago: '3 dni temu', rating: 5,
+        text: 'Najlepszy dentysta w mieście! Bezbolesne leczenie, nowoczesny sprzęt, miły personel. Doktor zawsze wyjaśnia co robi i dlaczego. W końcu nie boję się dentysty. Gorąco polecam wszystkim!',
+        replied: false,
+      },
+      {
+        id: 'rrp_r202',
+        reviewer: 'Robert Kowalczyk', initials: 'RK', color: '#8bc34a',
+        contribs: '6 opinii', ago: '2 tygodnie temu', rating: 1,
+        text: 'Koszmarny czas oczekiwania! Byłem umówiony na 10:00, siedziałem do 11:30. Nikt nie poinformował o opóźnieniu. Zabieg był ok, ale takie podejście do czasu pacjentów jest nieakceptowalne.',
+        replied: false,
+      },
+    ],
+  },
+  {
+    name: 'Dom i Wnętrze — Meble',
+    cat: 'Sklep meblowy · $$ · ul. Przemysłowa 100, Wrocław',
+    rating: 3.2, total: 412, open: true,
+    reviews: [
+      {
+        id: 'rrp_r301',
+        reviewer: 'Iwona Kaczmarek', initials: 'IK', color: '#ff5722',
+        contribs: '31 opinii', ago: '5 dni temu', rating: 1,
+        text: 'Zamówiłam szafę, która miała przyjść za 2 tygodnie. Minął miesiąc, brak szafy, nikt nie odbiera telefonu. Na infolinii każą czekać po 30 minut. Kompletny bałagan. Nigdy więcej!',
+        replied: false,
+      },
+      {
+        id: 'rrp_r302',
+        reviewer: 'Andrzej Bąk', initials: 'AB', color: '#cddc39',
+        contribs: '14 opinii', ago: '1 tydzień temu', rating: 4,
+        text: 'Dobry sklep, duży wybór, ceny ok. Montaż kuchni był profesjonalny. Jeden minus za trochę długi czas oczekiwania na dostawę.',
+        replied: false,
+      },
+      {
+        id: 'rrp_r303',
+        reviewer: 'Sylwia Kowacka', initials: 'SK', color: '#00bcd4',
+        contribs: '9 opinii', ago: '2 tygodnie temu', rating: 2,
+        text: 'Fotel za 1200zł, po 3 miesiącach odpadło oparcie. Reklamacja odrzucona "z powodów formalnych". Produkt słabej jakości za wysoką cenę.',
+        replied: false,
+      },
+    ],
+  },
+];
+
+let currentBiz = 0;
+
+// ── Render review card ────────────────────────────────────────────
+// CRITICAL: HTML structure must match content.js selectors
+function reviewHTML(r) {
+  const starFull  = Math.round(r.rating);
+  const ariaLabel = `Ocena: ${r.rating} na 5 gwiazdek`;  // matches RATING_SELECTORS aria-label*="star"
+  const starStr   = '★'.repeat(starFull) + '☆'.repeat(5 - starFull);
+  const starColor = r.rating <= 2 ? '#d93025' : r.rating === 3 ? '#fbbc04' : '#137333';
+
+  return `
+    <div class="review-card" data-review-id="${r.id}" id="card_${r.id}">
+
+      <div class="reviewer-row">
+        <div class="avatar" style="background:${r.color}">${r.initials}</div>
+        <div>
+          <!-- .d4r55 = content.js NAME_SELECTORS -->
+          <div class="d4r55">${r.reviewer}</div>
+          <div class="reviewer-sub">${r.contribs}</div>
+        </div>
+      </div>
+
+      <div class="rating-row">
+        <!-- .kvMYJc + aria-label = content.js RATING_SELECTORS -->
+        <span class="kvMYJc" role="img" aria-label="${ariaLabel}" style="color:${starColor}">${starStr}</span>
+        <span class="review-date">${r.ago}</span>
+      </div>
+
+      <!-- .wiI7pd = content.js TEXT_SELECTORS -->
+      <div class="wiI7pd">${r.text}</div>
+
+      ${r.replied ? `
+        <div class="owner-reply">
+          <!-- "Odpowiedź od właściciela" = content.js OWNER_REPLY_TEXT_SIGNALS -->
+          <div class="owner-reply-label">Odpowiedź od właściciela</div>
+          <div class="owner-reply-text">${r.replyText}</div>
+        </div>
+      ` : `
+        <div class="reply-area">
+          <button class="reply-trigger" aria-label="Reply" data-id="${r.id}">Odpowiedz</button>
+          <div class="reply-form" id="form_${r.id}">
+            <!-- aria-label matches content.js REPLY_BOX_SELECTORS -->
+            <textarea
+              class="reply-textarea"
+              id="textarea_${r.id}"
+              aria-label="Odpowiedz na recenzję"
+              placeholder="Napisz odpowiedź jako właściciel miejsca…"
+            ></textarea>
+            <div class="reply-btns">
+              <button class="btn-cancel" data-id="${r.id}" data-action="cancel">Anuluj</button>
+              <button class="btn-post"   data-id="${r.id}" data-action="post">Opublikuj odpowiedź</button>
+            </div>
+          </div>
+        </div>
+      `}
+
+    </div>
+  `;
+}
+
+// ── Render business ───────────────────────────────────────────────
+function renderBiz(idx) {
+  currentBiz = idx;
+  const b = BUSINESSES[idx];
+
+  // Update tabs
+  document.querySelectorAll('.biz-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+
+  // Business info
+  const starFull = Math.round(b.rating);
+  document.getElementById('biz-info').innerHTML = `
+    <div class="biz-name">${b.name}</div>
+    <div class="biz-rating-row">
+      <span class="biz-rating-num">${b.rating}</span>
+      <span class="biz-stars">${'★'.repeat(starFull) + '☆'.repeat(5-starFull)}</span>
+      <span class="biz-count">${b.total} opinii</span>
+    </div>
+    <div class="biz-meta">
+      ${b.cat} · <span class="${b.open ? 'open' : ''}">${b.open ? 'Otwarte' : 'Zamknięte'}</span>
+    </div>
+  `;
+
+  document.getElementById('reviews-title').textContent = `Opinie (${b.reviews.length})`;
+
+  const container = document.getElementById('reviews-container');
+  container.innerHTML = b.reviews.map(r => reviewHTML(r)).join('');
+
+  // Wire all interaction buttons
+  container.querySelectorAll('.reply-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const form = document.getElementById('form_' + btn.dataset.id);
+      if (form) { form.classList.toggle('open'); form.querySelector('textarea')?.focus(); }
+    });
+  });
+
+  container.querySelectorAll('[data-action="cancel"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const form = document.getElementById('form_' + btn.dataset.id);
+      if (form) { form.classList.remove('open'); form.querySelector('textarea').value = ''; }
+    });
+  });
+
+  container.querySelectorAll('[data-action="post"]').forEach(btn => {
+    btn.addEventListener('click', () => postReply(btn.dataset.id));
+  });
+}
+
+function postReply(id) {
+  const ta   = document.getElementById('textarea_' + id);
+  const text = ta?.value.trim();
+  if (!text) { showToast('Napisz odpowiedź przed opublikowaniem.'); return; }
+
+  // Update data
+  const rev = BUSINESSES[currentBiz].reviews.find(r => r.id === id);
+  if (rev) { rev.replied = true; rev.replyText = text; }
+
+  // Re-render the card
+  const card = document.getElementById('card_' + id);
+  if (card && rev) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = reviewHTML(rev);
+    card.replaceWith(tmp.firstElementChild);
+  }
+
+  showToast('✓ Odpowiedź opublikowana!');
+}
+
+function showToast(msg) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+document.querySelectorAll('.biz-tab').forEach((tab, i) => {
+  tab.addEventListener('click', () => renderBiz(parseInt(tab.dataset.biz)));
+});
+
+renderBiz(0);
+</script>
+</body>
+</html>

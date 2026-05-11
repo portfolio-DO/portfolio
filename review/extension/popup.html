@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Review Responder Pro</title>
+  <link rel="stylesheet" href="popup.css"/>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ── EKRAN LOGOWANIA ──────────────────────────────────────── -->
+  <div class="screen active" id="screen-auth">
+    <div class="auth-panel">
+
+      <div class="auth-logo">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <div class="auth-logo-name">Review Responder Pro</div>
+          <div class="auth-logo-sub">Automatyczne odpowiedzi na recenzje Google Maps</div>
+        </div>
+      </div>
+
+      <!-- Ostrzeżenie gdy Supabase nie skonfigurowany -->
+      <div class="config-warning hidden" id="supabase-note">
+        <div class="config-warning-icon">⚙️</div>
+        <div>
+          <strong>Wymagana konfiguracja</strong><br>
+          <span>Uzupełnij <code>extension/config.js</code> danymi Supabase.<br>
+          Szczegóły w pliku <strong>KONFIGURACJA.txt</strong>.</span>
+        </div>
+      </div>
+
+      <!-- Zakładki -->
+      <div class="auth-tabs" id="auth-tabs">
+        <button class="auth-tab active" data-auth="login">Zaloguj się</button>
+        <button class="auth-tab" data-auth="register">Utwórz konto</button>
+      </div>
+
+      <!-- LOGOWANIE -->
+      <div class="auth-form" id="auth-login">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" id="login-email" class="form-input"
+            placeholder="twoj@email.pl" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hasło</label>
+          <input type="password" id="login-pass" class="form-input"
+            placeholder="••••••••" autocomplete="current-password"/>
+        </div>
+        <div class="auth-error" id="login-error"></div>
+        <button class="btn-primary btn-full" id="btn-login">Zaloguj się</button>
+      </div>
+
+      <!-- REJESTRACJA -->
+      <div class="auth-form hidden" id="auth-register">
+        <div class="auth-bonus-note">
+          🎁 Nowe konto otrzymuje <strong>15 darmowych generacji AI</strong>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" id="reg-email" class="form-input"
+            placeholder="twoj@email.pl" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hasło (min. 8 znaków)</label>
+          <input type="password" id="reg-pass" class="form-input"
+            placeholder="••••••••" autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Powtórz hasło</label>
+          <input type="password" id="reg-pass2" class="form-input"
+            placeholder="••••••••" autocomplete="new-password"/>
+        </div>
+        <div class="auth-error" id="reg-error"></div>
+        <button class="btn-primary btn-full" id="btn-register">Utwórz konto za darmo</button>
+        <div class="auth-terms">
+          Konto jest przypisane do Twojego adresu e-mail.<br>
+          Premium aktywuje się automatycznie po zakupie.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── GŁÓWNY EKRAN APLIKACJI ────────────────────────────────── -->
+  <div class="screen hidden" id="screen-main">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-brand">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>RRP</span>
+        <span class="v-badge">v3</span>
+      </div>
+
+      <div class="nav-items">
+        <button class="nav-item active" data-panel="respond">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Odpowiadaj
+        </button>
+        <button class="nav-item" data-panel="templates">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+          Szablony
+        </button>
+        <button class="nav-item" data-panel="activity">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Aktywność
+        </button>
+        <button class="nav-item" data-panel="settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/></svg>
+          Ustawienia
+        </button>
+      </div>
+
+      <!-- Widget użycia AI -->
+      <div class="sidebar-usage">
+        <div class="sidebar-user-email" id="sidebar-email"></div>
+        <div class="usage-plan-badge" id="usage-plan-badge">DARMOWY</div>
+        <div class="usage-row">
+          <span class="usage-label">Darmowe użycia AI</span>
+          <span class="usage-count" id="usage-bonus-count">15 / 15</span>
+        </div>
+        <div class="usage-bar-wrap">
+          <div class="usage-bar"><div class="usage-fill" id="usage-bonus-fill" style="width:0%"></div></div>
+        </div>
+        <div class="usage-row" style="margin-top:5px">
+          <span class="usage-label">Miesięczne użycia AI</span>
+          <span class="usage-count" id="usage-monthly-count">5 / 5</span>
+        </div>
+        <div class="usage-bar-wrap">
+          <div class="usage-bar"><div class="usage-fill usage-fill-monthly" id="usage-monthly-fill" style="width:0%"></div></div>
+        </div>
+        <button class="btn-upgrade" id="btn-upgrade-sidebar">⚡ Przejdź na Premium</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="nav-item-sm" id="btn-signout">Wyloguj się</button>
+        <span class="app-version">v3.0.0</span>
+      </div>
+    </nav>
+
+    <!-- Główna zawartość -->
+    <main class="main-content">
+
+      <!-- ══ PANEL: Odpowiadaj ══════════════════════════════════ -->
+      <div class="panel panel-active" id="panel-respond">
+        <div class="panel-header">
+          <h2>Odpowiadaj na recenzje</h2>
+          <button class="btn-ghost btn-sm" id="btn-detect-page">↻ Wykryj ze strony</button>
+        </div>
+
+        <div class="respond-split">
+
+          <!-- Lewa kolumna: lista recenzji -->
+          <div class="review-list-col">
+            <div class="col-label">
+              Recenzje na stronie
+              <button class="btn-ghost btn-xs" id="btn-rescan-page" title="Odśwież listę">↻</button>
+            </div>
+            <div id="review-list" class="review-list">
+              <div class="empty-state">Otwórz stronę firmy na Google Maps i kliknij "Wykryj ze strony".</div>
+            </div>
+          </div>
+
+          <!-- Prawa kolumna: odpowiedź -->
+          <div class="reply-col">
+
+            <div class="card" id="selected-review-card">
+              <div class="card-label">Wybrana recenzja</div>
+              <div class="selected-review-meta">
+                <input type="text" id="reviewer-name" class="form-input form-input-sm" placeholder="Imię autora"/>
+                <select id="rating-select" class="form-select form-select-sm">
+                  <option value="">– ocena –</option>
+                  <option value="5">⭐⭐⭐⭐⭐</option>
+                  <option value="4">⭐⭐⭐⭐</option>
+                  <option value="3">⭐⭐⭐</option>
+                  <option value="2">⭐⭐</option>
+                  <option value="1">⭐</option>
+                </select>
+              </div>
+              <textarea id="review-input" class="review-textarea" rows="3"
+                placeholder="Treść recenzji pojawi się tu automatycznie lub wklej ręcznie…"></textarea>
+              <div class="already-replied-warning hidden" id="already-replied-warning">
+                ⚠ Ta recenzja ma już odpowiedź od właściciela.
+              </div>
+            </div>
+
+            <div class="mode-bar">
+              <span class="mode-label">Tryb:</span>
+              <div class="mode-pills">
+                <button class="mode-pill active" data-mode="both">Oba</button>
+                <button class="mode-pill" data-mode="ai">AI</button>
+                <button class="mode-pill" data-mode="template">Szablon</button>
+              </div>
+            </div>
+
+            <div class="reply-section" id="ai-section">
+              <div class="section-title">
+                <span class="ai-icon">✦</span> Odpowiedź AI
+                <span class="badge-ai-label">Claude</span>
+              </div>
+              <button class="btn-ai-generate" id="btn-ai-generate">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Wygeneruj odpowiedź AI
+              </button>
+              <div class="limit-warning hidden" id="ai-limit-warning">
+                <span>🔒</span>
+                <span id="ai-limit-text">Osiągnięto limit.</span>
+                <button class="btn-upgrade-inline" id="btn-upgrade-limit">Przejdź na Premium →</button>
+              </div>
+            </div>
+
+            <div class="reply-section" id="template-section">
+              <div class="section-title"><span>📄</span> Odpowiedź z szablonu</div>
+              <button class="btn-secondary btn-sm" id="btn-find-templates">Znajdź pasujące szablony</button>
+              <div id="template-matches" class="template-matches"></div>
+            </div>
+
+            <div class="editor-card hidden" id="editor-card">
+              <div class="editor-header">
+                <span class="editor-title">✏️ Edytuj odpowiedź</span>
+                <button class="btn-ghost btn-xs" id="btn-close-editor">✕</button>
+              </div>
+              <textarea id="response-editor" class="response-editor" rows="6"></textarea>
+              <div class="placeholder-warnings" id="placeholder-warnings"></div>
+              <div class="editor-actions">
+                <button class="btn-ghost btn-sm" id="btn-reset-editor">Resetuj</button>
+                <div class="editor-right-actions">
+                  <button class="btn-secondary btn-sm" id="btn-copy-response">📋 Kopiuj</button>
+                  <button class="btn-primary" id="btn-insert-response">↳ Wstaw na stronie</button>
+                </div>
+              </div>
+              <div class="copy-toast hidden" id="copy-toast">✓ Gotowe!</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PANEL: Szablony ══════════════════════════════════ -->
+      <div class="panel" id="panel-templates">
+        <div class="panel-header">
+          <h2>Biblioteka szablonów</h2>
+          <button class="btn-primary btn-sm" id="btn-show-add-template">+ Dodaj własny</button>
+        </div>
+
+        <div class="card hidden" id="add-template-form">
+          <div class="card-label">Nowy szablon</div>
+          <div class="form-group">
+            <label class="form-label">Tytuł</label>
+            <input type="text" id="new-tpl-title" class="form-input" placeholder="np. Moje przeprosiny" maxlength="80"/>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label class="form-label">Kategoria</label>
+              <select id="new-tpl-cat" class="form-select">
+                <option value="positive">Pozytywna</option>
+                <option value="negative">Negatywna</option>
+                <option value="neutral">Neutralna</option>
+                <option value="apologies_service" selected>Przeprosiny</option>
+                <option value="contact_request">Kontakt</option>
+                <option value="restaurant_service">Restauracja</option>
+                <option value="ecommerce">E-commerce</option>
+                <option value="followup">Follow-up</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label class="form-label">Ton</label>
+              <select id="new-tpl-tone" class="form-select">
+                <option value="warm">Ciepły</option>
+                <option value="professional">Profesjonalny</option>
+                <option value="casual">Nieformalny</option>
+                <option value="apologetic">Przepraszający</option>
+                <option value="firm_polite">Stanowczy</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Treść</label>
+            <textarea id="new-tpl-body" class="form-textarea" rows="5"
+              placeholder="Użyj [NAZWA FIRMY], [WŁAŚCICIEL], [EMAIL], [TELEFON]…"></textarea>
+          </div>
+          <div class="form-actions">
+            <button class="btn-ghost" id="btn-cancel-template">Anuluj</button>
+            <button class="btn-primary" id="btn-save-template">Zapisz</button>
+          </div>
+          <div class="save-toast hidden" id="template-save-toast">✓ Zapisano!</div>
+        </div>
+
+        <div class="template-filter-bar">
+          <input type="text" id="template-search" class="filter-input" placeholder="🔍 Szukaj szablonów…"/>
+          <select id="template-filter-cat" class="filter-select">
+            <option value="">Wszystkie kategorie</option>
+            <option value="positive">Pozytywne</option>
+            <option value="enthusiastic">Entuzjastyczne</option>
+            <option value="neutral">Neutralne</option>
+            <option value="negative">Negatywne</option>
+            <option value="apologies_service">Przeprosiny</option>
+            <option value="contact_request">Kontakt</option>
+            <option value="one_liner">Jedno zdanie</option>
+            <option value="long_professional">Długie</option>
+            <option value="ecommerce">E-commerce</option>
+            <option value="restaurant_service">Restauracja</option>
+            <option value="followup">Follow-up</option>
+          </select>
+          <select id="template-filter-access" class="filter-select">
+            <option value="">Wszystkie</option>
+            <option value="free">Darmowe</option>
+            <option value="premium">Premium</option>
+          </select>
+        </div>
+        <div id="template-grid" class="template-grid"></div>
+      </div>
+
+      <!-- ══ PANEL: Aktywność ═════════════════════════════════ -->
+      <div class="panel" id="panel-activity">
+        <div class="panel-header">
+          <h2>Historia odpowiedzi</h2>
+          <button class="btn-ghost btn-sm" id="btn-clear-log">Wyczyść</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Łącznie</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-ai">0</div><div class="stat-label">AI</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-tpl">0</div><div class="stat-label">Szablony</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-month">0</div><div class="stat-label">Ten miesiąc</div></div>
+        </div>
+        <div id="activity-list" class="activity-list">
+          <div class="empty-state">Brak historii. Wygeneruj pierwszą odpowiedź.</div>
+        </div>
+      </div>
+
+      <!-- ══ PANEL: Ustawienia ════════════════════════════════ -->
+      <div class="panel" id="panel-settings">
+        <div class="panel-header"><h2>Ustawienia</h2></div>
+
+        <div class="settings-grid">
+          <div class="card">
+            <div class="card-label">Dane firmy (używane w szablonach)</div>
+            <div class="form-group"><label class="form-label">Nazwa firmy</label><input type="text" id="s-business" class="form-input" placeholder="np. Restauracja Kowalskich"/></div>
+            <div class="form-group"><label class="form-label">Imię właściciela</label><input type="text" id="s-owner" class="form-input" placeholder="np. Jan Kowalski"/></div>
+            <div class="form-group"><label class="form-label">E-mail kontaktowy</label><input type="text" id="s-email" class="form-input" placeholder="kontakt@firma.pl"/></div>
+            <div class="form-group"><label class="form-label">Telefon kontaktowy</label><input type="text" id="s-phone" class="form-input" placeholder="+48 123 456 789"/></div>
+          </div>
+
+          <div class="card">
+            <div class="card-label">Ustawienia AI</div>
+            <div class="form-group"><label class="form-label">Ton odpowiedzi AI</label>
+              <select id="s-tone" class="form-select">
+                <option value="profesjonalny i ciepły">Profesjonalny i ciepły</option>
+                <option value="formalny i grzeczny">Formalny i grzeczny</option>
+                <option value="przyjazny i swobodny">Przyjazny i swobodny</option>
+                <option value="empatyczny i przepraszający">Empatyczny i przepraszający</option>
+                <option value="stanowczy, ale uprzejmy">Stanowczy, ale uprzejmy</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Długość odpowiedzi</label>
+              <select id="s-length" class="form-select">
+                <option value="short">Krótka (1-2 zdania)</option>
+                <option value="medium" selected>Średnia (2-4 zdania)</option>
+                <option value="long">Długa (4-6 zdań)</option>
+              </select>
+            </div>
+            <div class="toggle-row">
+              <div><div class="form-label">Tylko krótkie szablony</div><div class="hint-text">Pokaż wyłącznie szablony 1-2 zdania</div></div>
+              <label class="toggle"><input type="checkbox" id="s-short-only"/><span class="toggle-slider"></span></label>
+            </div>
+
+          </div>
+
+          <div class="card card-premium">
+            <div class="premium-badge">PREMIUM</div>
+            <div class="card-label">Plan Premium — $9 / miesiąc</div>
+            <ul class="premium-features">
+              <li>✓ 500 generacji AI miesięcznie</li>
+              <li>✓ Wszystkie 73+ szablony</li>
+              <li>✓ Nieograniczone własne szablony</li>
+              <li>✓ Przypisane do Twojego konta e-mail</li>
+            </ul>
+            <button class="btn-upgrade-large" id="btn-upgrade-settings">⚡ Przejdź na Premium — $9/mies.</button>
+            <div class="premium-status" id="premium-status"></div>
+          </div>
+        </div>
+
+        <div class="form-actions" style="margin-top:12px">
+          <button class="btn-primary" id="btn-save-settings">Zapisz ustawienia</button>
+          <div class="save-toast hidden" id="settings-save-toast">✓ Zapisano!</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<script src="config.js"></script>
+<script src="templates_pl.js"></script>
+<script src="auth.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

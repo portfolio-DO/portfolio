@@ -1,0 +1,321 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* Backgrounds */
+  --bg: #060812;
+  --bg-2: #0c1020;
+  --bg-3: #111827;
+
+  /* Surfaces */
+  --surface: #131929;
+  --surface-2: #1a2235;
+
+  /* Borders */
+  --border: #1e2d4a;
+  --border-2: #2a3d5c;
+
+  /* Text */
+  --text: #e8edf5;
+  --text-2: #8899b5;
+  --text-3: #4a5f7a;
+
+  /* Brand */
+  --blue: #3b82f6;
+  --blue-dark: #1d4ed8;
+  --purple: #8b5cf6;
+  --purple-dark: #6d28d9;
+  --cyan: #06b6d4;
+
+  /* Semantic */
+  --green: #10b981;
+  --red: #ef4444;
+  --amber: #f59e0b;
+
+  /* Gradients */
+  --grad: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --grad-cyan: linear-gradient(135deg, #06b6d4, #3b82f6);
+  --grad-green: linear-gradient(135deg, #10b981, #06b6d4);
+
+  /* Effects */
+  --glow: 0 0 40px rgba(59, 130, 246, 0.15);
+  --glow-purple: 0 0 60px rgba(139, 92, 246, 0.2);
+
+  /* Radii */
+  --r: 14px;
+  --r-sm: 8px;
+  --r-md: 10px;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
+.font-display {
+  font-family: 'Syne', system-ui, sans-serif;
+}
+
+.gradient-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-cyan {
+  background: var(--grad-cyan);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+   GLASSMORPHISM
+   ============================================================ */
+.glass {
+  background: rgba(19, 25, 41, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+/* ============================================================
+   LOADING / SKELETON
+   ============================================================ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface-2) 50%,
+    var(--surface) 75%
+  );
+  background-size: 200%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--r-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200%; }
+  100% { background-position: -200%; }
+}
+
+/* Loading dots */
+.loading-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: dotPulse 1.4s ease infinite;
+}
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================================
+   PREMIUM LOCKED
+   ============================================================ */
+.locked {
+  position: relative;
+  overflow: hidden;
+}
+.locked::after {
+  content: '🔒 Tylko Premium';
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 8, 18, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  border-radius: var(--r);
+  cursor: pointer;
+}
+.locked-blur {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in { animation: fadeIn 0.3s ease; }
+.animate-slide-in { animation: slideIn 0.3s ease; }
+.animate-scale-in { animation: scaleIn 0.2s ease; }
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.progress-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+/* ============================================================
+   CUSTOM COMPONENTS
+   ============================================================ */
+
+/* Toggle switch */
+.toggle-switch {
+  width: 40px;
+  height: 22px;
+  background: var(--border-2);
+  border-radius: 22px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+.toggle-switch.on {
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.toggle-switch.on::after {
+  left: calc(100% - 19px);
+}
+
+/* Criterion bar */
+.criterion-fill-animate {
+  animation: fillWidth 1s ease forwards;
+}
+@keyframes fillWidth {
+  from { width: 0; }
+}
+
+/* Glow button */
+.btn-glow:hover {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Textarea */
+textarea.editor {
+  resize: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.9;
+  caret-color: var(--blue);
+}
+textarea.editor::placeholder {
+  color: var(--text-3);
+}
+
+/* Input */
+input.field,
+textarea.field {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+input.field:focus,
+textarea.field:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================================
+   MINI CHART BARS
+   ============================================================ */
+.chart-bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.6s ease;
+  min-height: 4px;
+}

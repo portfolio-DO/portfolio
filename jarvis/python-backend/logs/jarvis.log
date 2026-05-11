@@ -1,0 +1,81 @@
+2026-05-03 19:30:18 | INFO | __main__:117 | JARVIS Backend startuje...
+2026-05-03 19:30:18 | INFO | core.assistant:47 | Inicjalizacja Whisper STT...
+2026-05-03 19:30:18 | INFO | stt.stt_engine:212 | Ladowanie Whisper: base.en
+2026-05-03 19:30:19 | INFO | stt.stt_engine:75 | Mikrofon uruchomiony
+2026-05-03 19:30:24 | INFO | stt.stt_engine:224 | [OK] Whisper zaladowany
+2026-05-03 19:30:24 | INFO | core.assistant:51 | Inicjalizacja wake word...
+2026-05-03 19:30:26 | INFO | stt.stt_engine:115 | Ladowanie wake word: hey_jarvis
+2026-05-03 19:30:26 | INFO | stt.stt_engine:124 | [OK] Wake word 'jarvis' (prog: 0.5)
+2026-05-03 19:30:26 | INFO | core.assistant:55 | Inicjalizacja TTS...
+2026-05-03 19:30:26 | INFO | tts.tts_engine:33 | TTS: pyttsx3 (offline)
+2026-05-03 19:30:26 | INFO | core.assistant:59 | Inicjalizacja planera AI...
+2026-05-03 19:30:31 | INFO | core.task_planner:267 | [OK] Backend AI: Groq (llama-3.1-8b-instant)
+2026-05-03 19:30:31 | INFO | automation.system:44 | Windows audio initialized (pycaw)
+2026-05-03 19:30:31 | INFO | automation.apps:118 | App launcher gotowy (auto-wykrywanie)
+2026-05-03 19:30:31 | INFO | plugins.weather:22 | Weather plugin ready
+2026-05-03 19:30:31 | INFO | automation.executor:61 | Loaded plugin: weather
+2026-05-03 19:30:31 | INFO | plugins.steam:62 | Steam znaleziony: D:\Steam\steam.exe
+2026-05-03 19:30:31 | INFO | automation.executor:61 | Loaded plugin: steam
+2026-05-03 19:30:31 | INFO | plugins.music:21 | Music plugin ready
+2026-05-03 19:30:31 | INFO | automation.executor:61 | Loaded plugin: music
+2026-05-03 19:30:31 | INFO | automation.executor:46 | Automation executor ready
+2026-05-03 19:30:31 | INFO | core.task_planner:300 | Automatyzacja gotowa
+2026-05-03 19:30:31 | INFO | core.assistant:63 | [OK] JARVIS gotowy!
+2026-05-03 19:30:31 | INFO | stt.stt_engine:151 | Wake word listener aktywny - mow 'hey jarvis'
+2026-05-03 19:30:31 | INFO | stt.stt_engine:141 | Wake word detector uruchomiony
+2026-05-03 19:30:31 | INFO | core.assistant:72 | Nasluchiwanie uruchomione
+2026-05-03 19:30:31 | INFO | __main__:127 | [OK] Nasluchiwanie aktywne
+2026-05-03 19:30:31 | INFO | __main__:138 | WebSocket na ws://localhost:8765
+2026-05-03 19:30:32 | INFO | __main__:48 | Electron polaczony (1 klientow)
+2026-05-03 19:30:34 | INFO | __main__:48 | Electron polaczony (2 klientow)
+2026-05-03 19:31:58 | INFO | core.assistant:173 | Komenda: 'turn on spotify'
+2026-05-03 19:31:58 | INFO | core.task_planner:362 | Krok 1/1: open_app
+2026-05-03 19:31:58 | INFO | automation.apps:122 | Uruchamiam: 'spotify'
+2026-05-03 19:32:43 | INFO | automation.apps:176 | Znaleziono: C:\Users\Admin\AppData\Roaming\Spotify\Spotify.exe
+2026-05-03 19:32:43 | INFO | automation.apps:255 | Start: C:\Users\Admin\AppData\Roaming\Spotify\Spotify.exe
+2026-05-03 19:32:43 | INFO | core.assistant:214 | [TTS] Opening spotify.
+2026-05-03 19:32:45 | INFO | core.assistant:211 | Komenda zakonczona - gotowy na nastepna
+2026-05-03 19:33:13 | INFO | core.assistant:173 | Komenda: 'open youtube and play god's plan by drake'
+2026-05-03 19:33:14 | INFO | core.task_planner:362 | Krok 1/2: browser_navigate
+2026-05-03 19:33:15 | WARNING | automation.browser:46 | Chrome not found, using Chromium
+2026-05-03 19:33:16 | INFO | automation.browser:55 | Browser initialized (Playwright/Chrome)
+2026-05-03 19:33:16 | INFO | automation.browser:65 | Browser navigating to: https://www.youtube.com
+2026-05-03 19:33:19 | INFO | core.task_planner:362 | Krok 2/2: play_youtube
+2026-05-03 19:33:19 | INFO | automation.browser:65 | Browser navigating to: https://www.youtube.com/results?search_query=drake+god's+plan
+2026-05-03 19:33:26 | INFO | automation.browser:80 | Clicked first YouTube video
+2026-05-03 19:33:26 | INFO | core.assistant:214 | [TTS] Navigated to https://www.youtube.com Playing YouTube: drake god's plan
+2026-05-03 19:33:34 | INFO | core.assistant:211 | Komenda zakonczona - gotowy na nastepna
+2026-05-03 19:34:18 | INFO | core.assistant:173 | Komenda: 'check a nice kebab place near me'
+2026-05-03 19:34:18 | INFO | core.task_planner:362 | Krok 1/1: search_web
+2026-05-03 19:34:18 | INFO | automation.browser:65 | Browser navigating to: https://www.google.com/search?q=kebab+places+near+me
+2026-05-03 19:34:18 | ERROR | core.task_planner:372 | Krok 'search_web' blad: Page.goto: Target page, context or browser has been closed
+2026-05-03 19:34:18 | INFO | core.assistant:214 | [TTS] Nie udalo sie: search_web
+2026-05-03 19:34:22 | INFO | core.assistant:211 | Komenda zakonczona - gotowy na nastepna
+2026-05-03 19:34:46 | INFO | core.assistant:173 | Komenda: 'open a browser and check a nice kebab place for me'
+2026-05-03 19:34:46 | INFO | core.task_planner:362 | Krok 1/2: open_app
+2026-05-03 19:34:46 | INFO | automation.apps:122 | Uruchamiam: 'chrome'
+2026-05-03 19:35:23 | INFO | automation.apps:176 | Znaleziono: C:\Users\Admin\AppData\Local\ms-playwright\chromium-1117\chrome-win\chrome.exe
+2026-05-03 19:35:23 | INFO | automation.apps:255 | Start: C:\Users\Admin\AppData\Local\ms-playwright\chromium-1117\chrome-win\chrome.exe
+2026-05-03 19:35:23 | INFO | core.task_planner:362 | Krok 2/2: browser_navigate
+2026-05-03 19:35:23 | INFO | automation.browser:65 | Browser navigating to: https://www.google.com
+2026-05-03 19:35:23 | ERROR | core.task_planner:372 | Krok 'browser_navigate' blad: Page.goto: Target page, context or browser has been closed
+2026-05-03 19:35:23 | INFO | core.assistant:214 | [TTS] Opening chrome. Nie udalo sie: browser_navigate
+2026-05-03 19:35:29 | INFO | core.assistant:211 | Komenda zakonczona - gotowy na nastepna
+2026-05-03 19:35:58 | INFO | core.assistant:173 | Komenda: 'go on spotify and play a song from playlist "polubione utwory"'
+2026-05-03 19:35:58 | INFO | core.task_planner:362 | Krok 1/2: open_app
+2026-05-03 19:35:58 | INFO | automation.apps:122 | Uruchamiam: 'spotify'
+2026-05-03 19:35:58 | INFO | automation.apps:255 | Start: C:\Users\Admin\AppData\Roaming\Spotify\Spotify.exe
+2026-05-03 19:35:59 | INFO | core.task_planner:362 | Krok 2/2: browser_navigate
+2026-05-03 19:35:59 | INFO | automation.browser:65 | Browser navigating to: https://open.spotify.com/playlist/polubione%20utwory
+2026-05-03 19:35:59 | ERROR | core.task_planner:372 | Krok 'browser_navigate' blad: Page.goto: Target page, context or browser has been closed
+2026-05-03 19:35:59 | INFO | core.assistant:214 | [TTS] Opening spotify. Nie udalo sie: browser_navigate
+2026-05-03 19:36:04 | INFO | core.assistant:211 | Komenda zakonczona - gotowy na nastepna
+2026-05-03 19:36:18 | INFO | core.assistant:173 | Komenda: 'go on the spotify app and in it play any song'
+2026-05-03 19:36:19 | INFO | core.task_planner:362 | Krok 1/2: open_app
+2026-05-03 19:36:19 | INFO | automation.apps:122 | Uruchamiam: 'spotify'
+2026-05-03 19:36:19 | INFO | automation.apps:255 | Start: C:\Users\Admin\AppData\Roaming\Spotify\Spotify.exe
+2026-05-03 19:36:19 | INFO | core.task_planner:362 | Krok 2/2: browser_navigate
+2026-05-03 19:36:19 | INFO | automation.browser:65 | Browser navigating to: https://open.spotify.com
+2026-05-03 19:36:19 | ERROR | core.task_planner:372 | Krok 'browser_navigate' blad: Page.goto: Target page, context or browser has been closed
+2026-05-03 19:36:19 | INFO | core.assistant:214 | [TTS] Opening spotify. Nie udalo sie: browser_navigate
+2026-05-03 19:36:24 | INFO | core.assistant:211 | Komenda zakonczona - gotowy na nastepna
